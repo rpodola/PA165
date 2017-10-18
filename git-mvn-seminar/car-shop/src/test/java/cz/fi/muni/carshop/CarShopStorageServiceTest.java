@@ -16,8 +16,11 @@ import org.junit.Rule;
 
 import cz.fi.muni.carshop.entities.Car;
 import cz.fi.muni.carshop.enums.CarTypes;
+import cz.fi.muni.carshop.exceptions.RequestedCarNotFoundException;
 import cz.fi.muni.carshop.services.CarShopStorageService;
 import cz.fi.muni.carshop.services.CarShopStorageServiceImpl;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CarShopStorageServiceTest {
 
@@ -43,7 +46,26 @@ public class CarShopStorageServiceTest {
 
 		assertTrue(service.isCarAvailable(Color.BLACK, CarTypes.AUDI).isPresent());
 	}
+        
+        @Test
+	public void testSellCarExc() throws RequestedCarNotFoundException {
+            thrown.expect(RequestedCarNotFoundException.class);
+            
+            Car testCar = new Car(Color.blue, CarTypes.TOYOTA, 2016, 899000);
 
+            service.sellCar(testCar);
+	}
+        
+        @Test
+	public void testSellCar() throws RequestedCarNotFoundException {
+            Car testCar = new Car(Color.BLACK, CarTypes.HONDA, 2016, 899000);
+            service.addCarToStorage(testCar);
+            
+            assertTrue(service.isCarAvailable(Color.BLACK, CarTypes.HONDA).isPresent());
+            service.sellCar(testCar);
+            assertTrue(!service.isCarAvailable(Color.BLACK, CarTypes.HONDA).isPresent());
+	}
+        
 	@Test
 	public void testCarShopStorage_containsTypeForExistingCar() {
 		service.addCarToStorage(new Car(Color.BLACK, CarTypes.AUDI, 2016, 899000));
